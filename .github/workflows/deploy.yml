@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Ensure tags are fetched
+
+    - name: Set Deployment Directory
+      id: set-dir
+      run: |
+        # '/index.html'
+        if [[ "${{ github.ref }}" == refs/heads/main ]]; then
+          echo "DEPLOY_DIR=" >> $GITHUB_ENV
+        # '/dev/index.html'
+        elif [[ "${{ github.ref }}" == refs/heads/dev ]]; then
+          echo "DEPLOY_DIR=dev" >> $GITHUB_ENV
+        # '/{TAG}/index.html
+        elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          TAG_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/tags\/v//')
+          echo "DEPLOY_DIR=$TAG_NAME" >> $GITHUB_ENV
+        fi
+
+    - name: Build Project (Optional)
+      run: |
+        # Run your build commands here if needed
+        # Example: npm install && npm run build
+        mkdir -p output
+        echo "<h1>Hello from $DEPLOY_DIR</h1>" > output/index.html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: output
+        destination_dir: ${{ env.DEPLOY_DIR }}
+        keep_files: true
+
