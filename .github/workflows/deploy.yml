@@ -8,6 +8,12 @@ on:
     tags:
       - 'v*'
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -39,6 +45,9 @@ jobs:
         # Example: npm install && npm run build
         mkdir -p output
         echo "<h1>Hello from $DEPLOY_DIR</h1>" > output/index.html
+
+    - name: Configure GitHub Pages
+      uses: actions/configure-pages@v5.0.0
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
